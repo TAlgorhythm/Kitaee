@@ -4,30 +4,35 @@ import java.util.*;
 public class Main {
 
     static int N;
-    static int[] price;
     static int[] time;
-    static int[] dp;
+    static int[] cost;
+    static int answer = 0;
 
-    public static void main(String args[]) throws IOException {
+    public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         N = Integer.parseInt(br.readLine());
-        price = new int[N];
         time = new int[N];
-        dp = new int[N+1];
+        cost = new int[N];
 
         for(int i=0; i<N; i++) {
             String[] info = br.readLine().split(" ");
             time[i] = Integer.parseInt(info[0]);
-            price[i] = Integer.parseInt(info[1]);
+            cost[i] = Integer.parseInt(info[1]);
         }
 
-        for(int i=0; i<N; i++) {
-            if(i+time[i] <= N) {
-                dp[i+time[i]] = Math.max(dp[i+time[i]], dp[i]+price[i]);
-            }
-            dp[i+1] = Math.max(dp[i+1], dp[i]);
-        }
+        dfs(0,0);
+        System.out.println(answer);
+    }
 
-        System.out.println(dp[N]);
+    static void dfs(int depth, int totalCost) {
+        if(depth > N) {
+            return;
+        } else if(depth == N) {
+            answer = Math.max(answer, totalCost);
+            return;
+        } else {
+            dfs(depth+time[depth], totalCost+cost[depth]);
+            dfs(depth + 1, totalCost);
+        }
     }
 }
