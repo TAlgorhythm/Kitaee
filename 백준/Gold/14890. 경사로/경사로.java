@@ -3,14 +3,16 @@ import java.util.*;
 
 public class Main {
 
-    static int N,L;
-    static int[][] graph;
-    static int[][] visited;
     static int answer = 0;
+    static int N,L;
+    static String[] info;
+    static int[][] graph;
+    static int[] visited;
 
-    public static void main(String args[]) throws IOException {
+
+    public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        String[] info = br.readLine().split(" ");
+        info = br.readLine().split(" ");
         N = Integer.parseInt(info[0]);
         L = Integer.parseInt(info[1]);
         graph = new int[N][N];
@@ -22,99 +24,73 @@ public class Main {
             }
         }
 
-        visited = new int[N][N];
-        // 가로 탐색
         for(int i=0; i<N; i++) {
-            int index = 1;
-            boolean isPossible = true;
-            while(true) {
-                if(graph[i][index-1] == graph[i][index]) {
-                    index+=1;
-                } else if(Math.abs(graph[i][index-1]-graph[i][index])>1) {
-                    isPossible = false;
-                    break;
-                } else if(graph[i][index-1] - graph[i][index] == 1) {   // 3 2 같은 상황 (-> 방향으로 경사로)
-                    for(int j=index; j<index+L; j++) {
-                        if(j>=N || visited[i][j]==1 || graph[i][index]!=graph[i][j]) {
-                            isPossible = false;
-                            break;
-                        }
-                        visited[i][j] = 1;
-                    }
-                    if(isPossible) {
-                        index+=1;
-                    } else {
-                        break;
-                    }
-                } else { // 2 3 같은 상황 (<- 방향으로 경사로)
-                    for(int j=index-1; j>index-1-L; j--) {
-                        if(j<0 || visited[i][j]==1 || graph[i][index-1]!=graph[i][j]) {
-                            isPossible = false;
-                            break;
-                        }
-                        visited[i][j] = 1;
-                    }
-                    if(isPossible) {
-                        index+=1;
-                    } else {
-                        break;
-                    }
-                }
-                if(index == N) {
-                    break;
-                }
-            }
-            if(isPossible) {
-                answer+=1;
-            }
+            if(checkHorizontal(i)) answer+=1;
+            if(checkVertical(i)) answer+=1;
         }
 
-        visited = new int[N][N];
-        // 세로 탐색
-        for(int i=0; i<N; i++) {
-            int index = 1;
-            boolean isPossible = true;
-            while(true) {
-                if(graph[index-1][i] == graph[index][i]) {
-                    index+=1;
-                } else if(Math.abs(graph[index-1][i]-graph[index][i])>1) {
-                    isPossible = false;
-                    break;
-                } else if(graph[index-1][i] - graph[index][i] == 1) {   // 3 2 같은 상황 (-> 방향으로 경사로)
-                    for(int j=index; j<index+L; j++) {
-                        if(j>=N || visited[j][i]==1 || graph[index][i]!=graph[j][i]) {
-                            isPossible = false;
-                            break;
+        System.out.println(answer);
+    }
+
+    static boolean checkHorizontal(int x) {
+        visited = new int[N];
+        for(int i=0; i<N-1; i++) {
+            int height = Math.abs(graph[x][i]-graph[x][i+1]);
+            if(height > 1) {
+                return false;
+            } else if(height == 0) {
+                continue;
+            } else {
+                if(graph[x][i] > graph[x][i+1]) {   // -> 방향으로 경사로 설치
+                    for(int j=i+1; j<i+1+L; j++) {
+                        if(0<=j && j<N && visited[j]==0 && graph[x][i+1]==graph[x][j]) {
+                            visited[j] = 1;
+                        } else {
+                            return false;
                         }
-                        visited[j][i] = 1;
                     }
-                    if(isPossible) {
-                        index+=1;
-                    } else {
-                        break;
-                    }
-                } else { // 2 3 같은 상황 (<- 방향으로 경사로)
-                    for(int j=index-1; j>index-1-L; j--) {
-                        if(j<0 || visited[j][i]==1 || graph[index-1][i]!=graph[j][i]) {
-                            isPossible = false;
-                            break;
+                } else {    // <- 방향으로 경사로 설치
+                    for(int j=i; j>i-L; j--) {
+                        if(0<=j && j<N && visited[j]==0 && graph[x][i]==graph[x][j]) {
+                            visited[j] = 1;
+                        } else {
+                            return false;
                         }
-                        visited[j][i] = 1;
-                    }
-                    if(isPossible) {
-                        index+=1;
-                    } else {
-                        break;
                     }
                 }
-                if(index == N) {
-                    break;
-                }
-            }
-            if(isPossible) {
-                answer+=1;
             }
         }
-        System.out.println(answer);
+        return true;
+    }
+
+    static boolean checkVertical(int y) {
+        visited = new int[N];
+        for(int i=0; i<N-1; i++) {
+            int height = Math.abs(graph[i][y]-graph[i+1][y]);
+            if(height > 1) {
+                return false;
+            } else if(height == 0) {
+                continue;
+            } else {
+                if(graph[i][y] > graph[i+1][y]) {   // -> 방향으로 경사로 설치
+                    for(int j=i+1; j<i+1+L; j++) {
+                        if(0<=j && j<N && visited[j]==0 && graph[i+1][y]==graph[j][y]) {
+                            visited[j] = 1;
+                        } else {
+                            return false;
+                        }
+                    }
+                } else {    // <- 방향으로 경사로 설치
+                    for(int j=i; j>i-L; j--) {
+                        if(0<=j && j<N && visited[j]==0 && graph[i][y]==graph[j][y]) {
+                            visited[j] = 1;
+                        } else {
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+        return true;
     }
 }
